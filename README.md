@@ -19,7 +19,6 @@ ToDo:
 -----
 - provide a way to change the font. imagettftext(), imagettfbbox() for calculating the position
 - transparency (watermark)
-- implement more positions, for example left top corner, left bottom corner, exact X/Y coordinates
 - borders
 - rotation
 

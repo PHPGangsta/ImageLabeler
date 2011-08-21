@@ -7,6 +7,9 @@
  */
 class ImageLabeler
 {
+    /**
+     * @var array
+     */
     protected $_options = array(
         'text'              => '',
         'position'          => self::POSITION_BOTTOM_RIGHT,
@@ -23,6 +26,9 @@ class ImageLabeler
         'labelOffsetY'      => 5,
     );
 
+    /**
+     * Some constants for positioning the string
+     */
     const POSITION_BOTTOM_RIGHT  = 0;
     const POSITION_BOTTOM_LEFT   = 1;
     const POSITION_BOTTOM_CENTER = 2;
@@ -31,11 +37,28 @@ class ImageLabeler
     const POSITION_TOP_CENTER    = 5;
     const POSITION_CENTER        = 6;
 
+    /**
+     * supported output image formats
+     *
+     * @var array
+     */
     protected $_supportedFormats = array('png', 'gif', 'jpg');
+    /**
+     * @var string
+     */
     protected $_tempFilePath;
+    /**
+     * @var string
+     */
     protected $_sourceFormat;
+    /**
+     * @var resource
+     */
     protected $_image;
 
+    /**
+     * @param array $options
+     */
     public function __construct(array $options = array())
     {
         if (is_array($options)) {
@@ -43,6 +66,12 @@ class ImageLabeler
         }
     }
 
+    /**
+     * All given options in the array are given to their setters
+     *
+     * @param array $options
+     * @return ImageLabeler
+     */
     public function setOptions(array $options)
     {
         foreach ($options as $key => $value) {
@@ -57,6 +86,11 @@ class ImageLabeler
         return $this;
     }
 
+    /**
+     * The main method which does all the work: read source file and put text onto the image
+     *
+     * @return ImageLabeler
+     */
     public function render()
     {
         $this->_createTempFilePath();
@@ -70,6 +104,11 @@ class ImageLabeler
         return $this;
     }
 
+    /**
+     * Send header and output the image
+     *
+     * @return ImageLabeler
+     */
     public function outputRenderedImage()
     {
         header('Content-Length: '.filesize($this->_tempFilePath));
@@ -80,40 +119,79 @@ class ImageLabeler
         return $this;
     }
 
+    /**
+     * Get the image as a string
+     *
+     * @return string
+     */
     public function getRenderedFileContent()
     {
         return file_get_contents($this->_tempFilePath);
     }
 
+    /**
+     * Get the path to the file after render() has been called
+     *
+     * @return string
+     */
     public function getRenderedFilePath()
     {
         return $this->_tempFilePath;
     }
 
+    /**
+     * Set the path to the source image
+     *
+     * @param string $filePath
+     * @return ImageLabeler
+     */
     public function setFilePath($filePath)
     {
         $this->_options['filePath'] = $filePath;
         return $this;
     }
 
+    /**
+     * Set the source image string
+     *
+     * @param string $fileContent
+     * @return ImageLabeler
+     */
     public function setFileContent($fileContent)
     {
         $this->_options['fileContent'] = $fileContent;
         return $this;
     }
 
+    /**
+     * Set the text that will be displayed
+     *
+     * @param string $text
+     * @return ImageLabeler
+     */
     public function setText($text)
     {
         $this->_options['text'] = $text;
         return $this;
     }
 
+    /**
+     * Set font size. This is a number between 1 und 5 (largest)
+     *
+     * @param string $fontSize
+     * @return ImageLabeler
+     */
     public function setFontSize($fontSize)
     {
         $this->_options['fontSize'] = $fontSize;
         return $this;
     }
 
+    /**
+     * Set the output format, see $this->_supportedFormats
+     * @param string $format
+     * @return ImageLabeler
+     */
     public function setFormat($format)
     {
         if (!in_array($format, $this->_supportedFormats)) {
@@ -124,42 +202,85 @@ class ImageLabeler
         return $this;
     }
 
+    /**
+     * Set the front color of the text as RGB values (e.g. 0000ff for blue)
+     *
+     * @param string $fontColor
+     * @return ImageLabeler
+     */
     public function setFontColor($fontColor)
     {
         $this->_options['fontColor'] = $fontColor;
         return $this;
     }
 
+    /**
+     * Set the background color of the text as RGB values (e.g. 0000ff for blue)
+     *
+     * @param string $backgroundColor
+     * @return ImageLabeler
+     */
     public function setBackgroundColor($backgroundColor)
     {
         $this->_options['backgroundColor'] = $backgroundColor;
         return $this;
     }
 
+    /**
+     * Set the X distance between text and the border of the image
+     *
+     * @param int $labelOffsetX
+     * @return ImageLabeler
+     */
     public function setLabelOffsetX($labelOffsetX)
     {
         $this->_options['labelOffsetX'] = $labelOffsetX;
         return $this;
     }
 
+    /**
+     * Sets the Y distance between text and the border of the image
+     *
+     * @param int $labelOffsetY
+     * @return ImageLabeler
+     */
     public function setLabelOffsetY($labelOffsetY)
     {
         $this->_options['labelOffsetY'] = $labelOffsetY;
         return $this;
     }
 
+    /**
+     * Set the quality/compression rate of the output image. 1 is worst quality, 100 highest
+     *
+     * @param string $percent
+     * @return ImageLabeler
+     */
     public function setTargetFileQuality($percent)
     {
         $this->_options['targetFileQuality'] = $percent;
         return $this;
     }
 
+    /**
+     * Sets the position of the text, see constants POSITION_*
+     *
+     * @param int $position
+     * @return ImageLabeler
+     */
     public function setPosition($position)
     {
         $this->_options['position'] = $position;
         return $this;
     }
 
+    /**
+     * Set exact X/Y coordinates of the text
+     *
+     * @param int $positionX
+     * @param int $positionY
+     * @return ImageLabeler
+     */
     public function setPositionXY($positionX, $positionY)
     {
         $this->_options['positionX'] = $positionX;
@@ -170,6 +291,9 @@ class ImageLabeler
 
     // ====== private and protected methods =============
 
+    /**
+     * Get a random file path in the system temp path
+     */
     protected function _createTempFilePath()
     {
         $tempFilePath = tempnam('', '') . '.' . $this->_options['format'];
@@ -177,6 +301,9 @@ class ImageLabeler
         $this->_tempFilePath = $tempFilePath;
     }
 
+    /**
+     * Read the source image
+     */
     protected function _readSourceImage()
     {
         if (!empty($this->_options['fileContent'])) {
@@ -188,8 +315,13 @@ class ImageLabeler
         }
     }
 
+    /**
+     * Adjust font size if needed, calculate X/Y coordinates if needed and put the text to the image
+     */
     protected function _labelImage()
     {
+        $this->_adjustFontSizeIfNeeded();
+
         list($labelX, $labelY) = $this->_getLabelXY();
 
         // convert colors to image color values
@@ -220,6 +352,21 @@ class ImageLabeler
 		imagestring($this->_image, $this->_options['fontSize'], $labelX, $labelY, $this->_options['text'], $fontColor);
     }
 
+    /**
+     * If the text does not fit into the image with the preferred size, we try a smaller size
+     */
+    protected function _adjustFontSizeIfNeeded()
+    {
+        while ($this->_options['fontSize'] > 1 &&
+               strlen($this->_options['text']) * imagefontwidth($this->_options['fontSize']) + $this->_options['labelOffsetX'] > imagesx($this->_image)) {
+            $this->_options['fontSize']--;
+        }
+    }
+
+    /**
+     * Calculate the X/Y coordinates of the label
+     * @return array
+     */
     protected function _getLabelXY()
     {
         if ($this->_options['positionX'] !== null && $this->_options['positionY'] !== null) {
@@ -268,6 +415,9 @@ class ImageLabeler
         return array($labelX, $labelY);
     }
 
+    /**
+     * write the image to a file depending on the output format
+     */
     protected function _writeImageToTargetFile()
     {
         switch ($this->_options['format']) {
