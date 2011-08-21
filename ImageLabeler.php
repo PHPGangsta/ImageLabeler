@@ -9,6 +9,9 @@ class ImageLabeler
 {
     protected $_options = array(
         'text'              => '',
+        'position'          => self::POSITION_BOTTOM_RIGHT,
+        'positionX'         => null,
+        'positionY'         => null,
         'fontSize'          => '3',
         'fontColor'         => 'e50000',
         'backgroundColor'   => 'ffffff',
@@ -19,6 +22,14 @@ class ImageLabeler
         'labelOffsetX'      => 5,
         'labelOffsetY'      => 5,
     );
+
+    const POSITION_BOTTOM_RIGHT  = 0;
+    const POSITION_BOTTOM_LEFT   = 1;
+    const POSITION_BOTTOM_CENTER = 2;
+    const POSITION_TOP_RIGHT     = 3;
+    const POSITION_TOP_LEFT      = 4;
+    const POSITION_TOP_CENTER    = 5;
+    const POSITION_CENTER        = 6;
 
     protected $_supportedFormats = array('png', 'gif', 'jpg');
     protected $_tempFilePath;
@@ -143,6 +154,19 @@ class ImageLabeler
         return $this;
     }
 
+    public function setPosition($position)
+    {
+        $this->_options['position'] = $position;
+        return $this;
+    }
+
+    public function setPositionXY($positionX, $positionY)
+    {
+        $this->_options['positionX'] = $positionX;
+        $this->_options['positionY'] = $positionY;
+        return $this;
+    }
+
 
     // ====== private and protected methods =============
 
@@ -166,13 +190,7 @@ class ImageLabeler
 
     protected function _labelImage()
     {
-        // calc label size
-		$labelWidth = strlen($this->_options['text']) * imagefontwidth($this->_options['fontSize']);
-		$labelHeight = imagefontheight($this->_options['fontSize']);
-
-		// calc label position
-		$labelX = imagesx($this->_image) - $labelWidth - $this->_options['labelOffsetX'];
-		$labelY = imagesy($this->_image) - $labelHeight - $this->_options['labelOffsetY'];
+        list($labelX, $labelY) = $this->_getLabelXY();
 
         // convert colors to image color values
         $fontColor = imagecolorallocate(
@@ -202,10 +220,57 @@ class ImageLabeler
 		imagestring($this->_image, $this->_options['fontSize'], $labelX, $labelY, $this->_options['text'], $fontColor);
     }
 
+    protected function _getLabelXY()
+    {
+        if ($this->_options['positionX'] !== null && $this->_options['positionY'] !== null) {
+            $labelX = $this->_options['positionX'];
+            $labelY = $this->_options['positionY'];
+        } else {
+            // calc label size
+            $labelWidth = strlen($this->_options['text']) * imagefontwidth($this->_options['fontSize']);
+            $labelHeight = imagefontheight($this->_options['fontSize']);
+
+            // calc label position
+            switch ($this->_options['position']) {
+                case self::POSITION_BOTTOM_RIGHT:
+                    $labelX = imagesx($this->_image) - $labelWidth - $this->_options['labelOffsetX'];
+                    $labelY = imagesy($this->_image) - $labelHeight - $this->_options['labelOffsetY'];
+                    break;
+                case self::POSITION_BOTTOM_LEFT:
+                    $labelX = $this->_options['labelOffsetX'];
+                    $labelY = imagesy($this->_image) - $labelHeight - $this->_options['labelOffsetY'];
+                    break;
+                case self::POSITION_TOP_LEFT:
+                    $labelX = $this->_options['labelOffsetX'];
+                    $labelY = $this->_options['labelOffsetY'];
+                    break;
+                case self::POSITION_TOP_RIGHT:
+                    $labelX = imagesx($this->_image) - $labelWidth - $this->_options['labelOffsetX'];
+                    $labelY = $this->_options['labelOffsetY'];
+                    break;
+                case self::POSITION_CENTER:
+                    $labelX = ceil(imagesx($this->_image)/2 - $labelWidth/2);
+                    $labelY = ceil(imagesy($this->_image)/2 - $labelHeight/2);
+                    break;
+                case self::POSITION_TOP_CENTER:
+                    $labelX = ceil(imagesx($this->_image)/2 - $labelWidth/2);
+                    $labelY = $this->_options['labelOffsetY'];
+                    break;
+                case self::POSITION_BOTTOM_CENTER:
+                    $labelX = ceil(imagesx($this->_image)/2 - $labelWidth/2);
+                    $labelY = imagesy($this->_image) - $labelHeight - $this->_options['labelOffsetY'];
+                    break;
+                default:
+                    throw new Exception('Invalid position used. Check constants ImageLabeler::POSITION_*');
+            }
+        }
+
+        return array($labelX, $labelY);
+    }
+
     protected function _writeImageToTargetFile()
     {
-        switch ($this->_options['format'])
-        {
+        switch ($this->_options['format']) {
             case 'png':
                 $pngQuality = ($this->_options['targetFileQuality'] - 100) / 11.111111;
                 $pngQuality = round(abs($pngQuality));
