@@ -14,6 +14,8 @@ See example files
 
 ![After](http://www.phpgangsta.de/wp-content/uploads/63D6.tmp_.png "After")
 
+![With Box](http://www.phpgangsta.de/wp-content/uploads/imagelabelwithbox.png "With Box")
+
 
 ToDo:
 -----
