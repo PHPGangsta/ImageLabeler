@@ -10,6 +10,9 @@ Usage:
 ------
 See example files
 
+![Before](http://www.phpgangsta.de/wp-content/uploads/elephpants.jpg "Before")
+![After](http://www.phpgangsta.de/wp-content/uploads/63D6.tmp_.png "After")
+
 
 ToDo:
 -----
